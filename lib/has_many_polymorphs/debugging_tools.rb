@@ -9,7 +9,7 @@ Enable the different tools by setting the environment variable HMP_DEBUG. Settin
 
 Enabled by default when HMP_DEBUG is set.
 
-Ouputs a folder <tt>generated_models/</tt> in RAILS_ROOT containing valid Ruby files explaining all the ActiveRecord relationships set up by the plugin, as well as listing the line in the plugin that called each particular association method.
+Ouputs a folder <tt>generated_models/</tt> in Rails.root containing valid Ruby files explaining all the ActiveRecord relationships set up by the plugin, as well as listing the line in the plugin that called each particular association method.
 
 == Ruby-debug
 
@@ -19,7 +19,7 @@ Starts <tt>ruby-debug</tt> for the life of the process.
 
 == Trace
 
-Enable by setting HMP_DEBUG to <tt>"ruby-debug"</tt>.
+Enable by setting HMP_DEBUG to <tt>"trace"</tt>.
 
 Outputs an indented trace of relevant method calls as they occur.
 
@@ -41,7 +41,8 @@ class << ActiveRecord::Base
   end
 
   unless defined? GENERATED_CODE_DIR
-    GENERATED_CODE_DIR = "#{RAILS_ROOT}/generated_models"
+    base_dir = defined?(Rails) ? Rails.root.expand_path : '/tmp'
+    GENERATED_CODE_DIR = "#{base_dir}/generated_models"
 
     begin
       system "rm -rf #{GENERATED_CODE_DIR}"
@@ -57,8 +58,8 @@ class << ActiveRecord::Base
           Dir.chdir GENERATED_CODE_DIR do
             filename = "#{demodulate(self.name.underscore)}.rb"
             contents = File.open(filename).read rescue "\nclass #{self.name}\n\nend\n"
-            line = caller[1][/\:(\d+)\:/, 1]
-            contents[-5..-5] = "\n  #{method_name} #{args[0..-2].inspect[1..-2]},\n     #{args[-1].inspect[1..-2].gsub(" :", "\n     :").gsub("=>", " => ")}\n#{ block ? "     #{block.inspect.sub(/\@.*\//, '@')}\n" : ""}     # called from line #{line}\n\n"
+            callfile, callline = caller[2][%r!/.*/(.*?:\d+)!, 1].split(':')
+            contents[-5..-5] = "\n  #{method_name} #{args[0..-2].inspect[1..-2]},\n     #{args[-1].inspect[1..-2].gsub(" :", "\n     :").gsub("=>", " => ")}\n#{ block ? "     #{block.inspect.sub(/\@.*\//, '@')}\n" : ""}     # called from #{callfile}, line #{callline}\n\n"
             File.open(filename, "w") do |file|
               file.puts contents
             end
