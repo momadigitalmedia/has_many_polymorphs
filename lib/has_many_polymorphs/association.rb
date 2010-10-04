@@ -144,10 +144,15 @@ module ActiveRecord #:nodoc:
 
       # construct attributes for join for a particular record
       def construct_join_attributes(record) #:nodoc:
-        {@reflection.options[:polymorphic_key] => record.id,
+        {
+          @reflection.options[:polymorphic_key] => record.id,
           @reflection.options[:polymorphic_type_key] => "#{record.class.base_class}",
-          @reflection.options[:foreign_key] => @owner.id}.merge(@reflection.options[:foreign_type_key] ?
-        {@reflection.options[:foreign_type_key] => "#{@owner.class.base_class}"} : {}) # for double-sided relationships
+          @reflection.options[:foreign_key] => @owner.id
+        }.merge(
+          @reflection.options[:foreign_type_key] ?
+            { @reflection.options[:foreign_type_key] => "#{@owner.class.base_class}" } :
+            {}
+        ) # for double-sided relationships
       end
 
       def build(attrs = nil) #:nodoc:
