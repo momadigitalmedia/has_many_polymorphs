@@ -1,4 +1,3 @@
-
 module ActiveRecord #:nodoc:
   module Associations #:nodoc:
 
@@ -17,7 +16,6 @@ You do not need to set up any other associations other than for either the regul
 There is a tentative report that you can make the parent model be its own join model, but this is untested.
 
 =end
-
    module PolymorphicClassMethods
 
      RESERVED_DOUBLES_KEYS = [:conditions, :order, :limit, :offset, :extend, :skip_duplicates,
@@ -58,7 +56,6 @@ These options are passed through to targets on both sides of the association. If
 <tt>:namespace</tt>:: A symbol. Prepended to all the models in the <tt>:from</tt> and <tt>:through</tt> keys. This is especially useful for Camping, which namespaces models by default.
 
 =end
-
       def acts_as_double_polymorphic_join options={}, &extension
 
         collections, options = extract_double_collections(options)
@@ -239,8 +236,7 @@ When you request an individual association, non-applicable but fully-qualified f
 Be aware, however, that <tt>NULL != 'Spot'</tt> returns <tt>false</tt> due to SQL's 3-value logic. Instead, you need to use the <tt>:conditions</tt> string <tt>"dogs.name IS NULL OR dogs.name != 'Spot'"</tt> to get the behavior you probably expect for negative matches.
 
 =end
-
-      def has_many_polymorphs (association_id, options = {}, &extension)
+      def has_many_polymorphs(association_id, options = {}, &extension)
         _logger_debug "associating #{self}.#{association_id}"
         reflection = create_has_many_polymorphs_reflection(association_id, options, &extension)
         # puts "Created reflection #{reflection.inspect}"
@@ -248,7 +244,9 @@ Be aware, however, that <tt>NULL != 'Spot'</tt> returns <tt>false</tt> due to SQ
         collection_reader_method(reflection, PolymorphicAssociation)
       end
 
-      # Composed method that assigns option defaults,  builds the reflection object, and sets up all the related associations on the parent, join, and targets.
+      # Composed method that assigns option defaults,  builds the reflection
+      # object, and sets up all the related associations on the parent, join,
+      # and targets.
       def create_has_many_polymorphs_reflection(association_id, options, &extension) #:nodoc:
         options.assert_valid_keys(
           :from,
@@ -273,7 +271,7 @@ Be aware, however, that <tt>NULL != 'Spot'</tt> returns <tt>false</tt> due to SQ
           :table_aliases,
           :select, # applies to the polymorphic relationship
           :conditions, # applies to the polymorphic relationship, the children, and the join
-  #        :include,
+          # :include,
           :parent_conditions,
           :parent_order,
           :order, # applies to the polymorphic relationship, the children, and the join
@@ -284,16 +282,17 @@ Be aware, however, that <tt>NULL != 'Spot'</tt> returns <tt>false</tt> due to SQ
           :parent_group,
           :parent_limit,
           :parent_offset,
-  #        :source,
+          # :source,
           :namespace,
           :uniq, # XXX untested, only applies to the polymorphic relationship
-  #        :finder_sql,
-  #        :counter_sql,
-  #        :before_add,
-  #        :after_add,
-  #        :before_remove,
-  #        :after_remove
-           :dummy)
+          # :finder_sql,
+          # :counter_sql,
+          # :before_add,
+          # :after_add,
+          # :before_remove,
+          # :after_remove
+          :dummy
+        )
 
         # validate against the most frequent configuration mistakes
         verify_pluralization_of(association_id)
@@ -397,7 +396,7 @@ Be aware, however, that <tt>NULL != 'Spot'</tt> returns <tt>false</tt> due to SQ
           # :offset => reflection.options[:offset],
           # :order => devolve(association_id, reflection, reflection.options[:order], reflection.klass, true),
           # :conditions => devolve(association_id, reflection, reflection.options[:conditions], reflection.klass, true)
-          }
+        }
 
         if reflection.options[:foreign_type_key]
           type_check = "#{reflection.options[:join_class_name].constantize.quoted_table_name}.#{reflection.options[:foreign_type_key]} = #{quote_value(self.base_class.name)}"
@@ -457,7 +456,7 @@ Be aware, however, that <tt>NULL != 'Spot'</tt> returns <tt>false</tt> due to SQ
               has_many(through,
                 :as => association_id._singularize,
 #                :source => association_id._singularize,
-#                :source_type => reflection.options[:polymorphic_type_key],
+               # :source_type => reflection.options[:polymorphic_type_key],
                 :class_name => reflection.klass.name,
                 :dependent => reflection.options[:dependent],
                 :extend => reflection.options[:join_extend],
@@ -598,7 +597,6 @@ Be aware, however, that <tt>NULL != 'Spot'</tt> returns <tt>false</tt> due to SQ
         end
         module_extensions
       end
-
     end
   end
 end
