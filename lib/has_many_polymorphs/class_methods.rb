@@ -142,54 +142,6 @@ These options are passed through to targets on both sides of the association. If
         end
       end
 
-      private
-
-      def extract_double_collections(options)
-        collections = options._select do |key, value|
-          value.is_a? Array and key.to_s !~ /(#{RESERVED_DOUBLES_KEYS.map(&:to_s).join('|')})$/
-        end
-
-        raise PolymorphicError, "Couldn't understand options in acts_as_double_polymorphic_join. Valid parameters are your two class collections, and then #{RESERVED_DOUBLES_KEYS.inspect[1..-2]}, with optionally your collection names prepended and joined with an underscore." unless collections.size == 2
-
-        options = options._select do |key, value|
-          !collections[key]
-        end
-
-        [collections, options]
-      end
-
-      def make_general_option_keys_specific!(options, collections)
-        collection_option_keys = Hash[*collections.keys.map do |key|
-          [key, RESERVED_DOUBLES_KEYS.map{|option| "#{key}_#{option}".to_sym}]
-        end._flatten_once]
-
-        collections.keys.each do |collection|
-          options.each do |key, value|
-            next if collection_option_keys.values.flatten.include? key
-            # shift the general options to the individual sides
-            collection_key = "#{collection}_#{key}".to_sym
-            collection_value = options[collection_key]
-            case key
-              when :conditions
-                collection_value, value = sanitize_sql(collection_value), sanitize_sql(value)
-                options[collection_key] = (collection_value ? "(#{collection_value}) AND (#{value})" : value)
-              when :order
-                options[collection_key] = (collection_value ? "#{collection_value}, #{value}" : value)
-              when :extend, :join_extend
-                options[collection_key] = Array(collection_value) + Array(value)
-              else
-                options[collection_key] ||= value
-            end
-          end
-        end
-
-        collection_option_keys
-      end
-
-
-
-      public
-
 =begin rdoc
 
 This method createds a single-sided polymorphic relationship.
@@ -351,6 +303,47 @@ Be aware, however, that <tt>NULL != 'Spot'</tt> returns <tt>false</tt> due to SQ
 
       private
 
+      def extract_double_collections(options)
+        collections = options._select do |key, value|
+          value.is_a? Array and key.to_s !~ /(#{RESERVED_DOUBLES_KEYS.map(&:to_s).join('|')})$/
+        end
+
+        raise PolymorphicError, "Couldn't understand options in acts_as_double_polymorphic_join. Valid parameters are your two class collections, and then #{RESERVED_DOUBLES_KEYS.inspect[1..-2]}, with optionally your collection names prepended and joined with an underscore." unless collections.size == 2
+
+        options = options._select do |key, value|
+          !collections[key]
+        end
+
+        [collections, options]
+      end
+
+      def make_general_option_keys_specific!(options, collections)
+        collection_option_keys = Hash[*collections.keys.map do |key|
+          [key, RESERVED_DOUBLES_KEYS.map{|option| "#{key}_#{option}".to_sym}]
+        end._flatten_once]
+
+        collections.keys.each do |collection|
+          options.each do |key, value|
+            next if collection_option_keys.values.flatten.include? key
+            # shift the general options to the individual sides
+            collection_key = "#{collection}_#{key}".to_sym
+            collection_value = options[collection_key]
+            case key
+              when :conditions
+                collection_value, value = sanitize_sql(collection_value), sanitize_sql(value)
+                options[collection_key] = (collection_value ? "(#{collection_value}) AND (#{value})" : value)
+              when :order
+                options[collection_key] = (collection_value ? "#{collection_value}, #{value}" : value)
+              when :extend, :join_extend
+                options[collection_key] = Array(collection_value) + Array(value)
+              else
+                options[collection_key] ||= value
+            end
+          end
+        end
+
+        collection_option_keys
+      end
 
       # table mapping for use at the instantiation point
 
