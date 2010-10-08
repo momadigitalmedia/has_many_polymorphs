@@ -18,6 +18,11 @@ module ActiveRecord
           klass = record["#{self.table_name}.#{reflection.options[:polymorphic_type_key]}"].constantize
           if sti_klass = record["#{klass.table_name}.#{klass.inheritance_column}"]
             klass = klass.class_eval do compute_type(sti_klass) end # in case of namespaced STI models
+
+            # copy the data over to the right structure
+            klass.columns.map(&:name).each do |col|
+              record["#{klass.table_name}.#{col}"] = record["#{klass.base_class.table_name}.#{col}"]
+            end
           end
 
           # check that the join actually joined to something
