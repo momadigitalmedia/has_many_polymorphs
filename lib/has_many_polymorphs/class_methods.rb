@@ -405,27 +405,17 @@ Be aware, however, that <tt>NULL != 'Spot'</tt> returns <tt>false</tt> due to SQ
 
       def inject_before_save_into_join_table(association_id, reflection)
         sti_hook = "sti_class_rewrite"
-        rewrite_procedure = %[self.send(:#{reflection.options[:polymorphic_type_key]}=, self.#{reflection.options[:polymorphic_type_key]}.constantize.base_class.name)]
+        polymorphic_type_key = reflection.options[:polymorphic_type_key]
 
-        # XXX should be abstracted?
-        # TODO change code to avoid the following deprecation warning:
-        # DEPRECATION WARNING: Base#before_save has been deprecated, please use Base.before_save :method instead. (called from alias_method at /Users/matthias/Projects/has_many_polymorphs/lib/has_many_polymorphs/class_methods.rb:432)
-        reflection.klass.class_eval %[
-          unless instance_methods.include? "before_save_with_#{sti_hook}"
-            if instance_methods.include? "before_save"
-              alias_method :before_save_without_#{sti_hook}, :before_save
-              def before_save_with_#{sti_hook}
-                before_save_without_#{sti_hook}
-                #{rewrite_procedure}
-              end
-            else
-              def before_save_with_#{sti_hook}
-                #{rewrite_procedure}
-              end
+        reflection.klass.class_eval %{
+          unless [self._save_callbacks.map(&:raw_filter)].flatten.include?(:#{sti_hook})
+            before_save :#{sti_hook}
+
+            def #{sti_hook}
+              self.send(:#{polymorphic_type_key}=, self.#{polymorphic_type_key}.constantize.base_class.name)
             end
-            alias_method :before_save, :before_save_with_#{sti_hook}
           end
-        ]
+        }
       end
 
       def create_has_many_through_associations_for_children_to_parent(association_id, reflection)
