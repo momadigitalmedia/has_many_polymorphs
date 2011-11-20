@@ -13,6 +13,6 @@ Gem::Specification.new do |s|
   s.add_dependency "activerecord"
   s.required_rubygems_version = ">= 1.3.6"
 
-  s.files        = Dir.glob("{bin,lib}/**/*") + %w(LICENSE README CHANGELOG)
+  s.files        = Dir.glob("{bin,lib}/**/*") + %w(LICENSE README CHANGELOG Gemfile)
   s.require_path = 'lib'
 end
