@@ -22,7 +22,7 @@ module ActiveRecord #:nodoc:
 
 	# DEPRICATED for Rails 3.2
         #write_inheritable_hash :reflections, name => reflection
-        reflection
+        reflections
       end
 
     end
