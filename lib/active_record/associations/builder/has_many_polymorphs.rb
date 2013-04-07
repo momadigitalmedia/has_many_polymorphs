@@ -4,7 +4,7 @@ module ActiveRecord::Associations::Builder
   class HasManyPolymorphs < CollectionAssociation #:nodoc:
     self.macro = :has_many_polymorphs
 
-    self.valid_options += [:from, :through, :as, :conflicts, :polymorphic_key, :association_foreign_key, :polymorphic_type_key, :skip_duplicates, :dependent, :join_class_name, :table_aliases, :join_extend, :parent_extend]
+    self.valid_options += [:from, :through, :as, :conflicts, :polymorphic_key, :association_foreign_key, :polymorphic_type_key, :skip_duplicates, :dependent, :join_class_name, :table_aliases, :join_extend, :parent_extend, :rename_individual_collections]
 
     def build
       validate_options
@@ -89,6 +89,8 @@ module ActiveRecord::Associations::Builder
 
       # options[:finder_sql] ||= "(options[:polymorphic_key]
 
+      options[:original_through] = options[:through]
+
       options[:through] ||= build_join_table_symbol(association_id, (options[:as]._pluralize or model.table_name))
 
       # set up namespaces if we have a namespace key
@@ -158,10 +160,11 @@ module ActiveRecord::Associations::Builder
 
     def construct_joins(custom_joins = nil) #:nodoc:
                                             # build the string of default joins
-      "JOIN #{model.quoted_table_name} AS polymorphic_parent ON #{options[:through]}.#{options[:foreign_key]} = polymorphic_parent.#{model.primary_key} " +
+      through_relation = options[:original_through]._as_class.table_name
+      "JOIN #{model.quoted_table_name} AS polymorphic_parent ON #{through_relation}.#{options[:foreign_key]} = polymorphic_parent.#{model.primary_key} " +
           options[:from].map do |plural|
             klass = plural._as_class
-            "LEFT JOIN #{klass.quoted_table_name} ON #{options[:through]}.#{options[:polymorphic_key]} = #{klass.quoted_table_name}.#{klass.primary_key} AND #{options[:through]}.#{options[:polymorphic_type_key]} = #{klass.quote_value(klass.base_class.name)}"
+            "LEFT JOIN #{klass.quoted_table_name} ON #{through_relation}.#{options[:polymorphic_key]} = #{klass.quoted_table_name}.#{klass.primary_key} AND #{through_relation}.#{options[:polymorphic_type_key]} = #{klass.quote_value(klass.base_class.name)}"
           end.uniq.join(" ") + " #{custom_joins}"
     end
 
