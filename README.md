@@ -76,63 +76,63 @@ If you are using the gem, make sure to add <tt>require 'has_many_polymorphs'</tt
 
 Setup the parent model as so:
 
-  class Kennel < ActiveRecord::Base
-    has_many_polymorphs :guests, :from => [:dogs, :cats, :birds]
-  end
+          class Kennel < ActiveRecord::Base
+            has_many_polymorphs :guests, :from => [:dogs, :cats, :birds]
+          end
 
 The join model:
 
-  class GuestsKennel < ActiveRecord::Base
-    belongs_to :kennel
-    belongs_to :guest, :polymorphic => true
-  end
+          class GuestsKennel < ActiveRecord::Base
+            belongs_to :kennel
+            belongs_to :guest, :polymorphic => true
+          end
 
 One of the child models:
 
-  class Dog < ActiveRecord::Base
-    # nothing
-  end
+        class Dog < ActiveRecord::Base
+            # nothing
+        end
 
 For your parent and child models, you don't need any special fields in your migration. For the join model (GuestsKennel), use a migration like so:
 
-  class CreateGuestsKennels < ActiveRecord::Migration
-    def self.up
-      create_table :guests_kennels do |t|
-        t.references :guest, :polymorphic => true
-        t.references :kennel
-      end
-    end
-  
-    def self.down
-      drop_table :guests_kennels
-    end
-  end
+        class CreateGuestsKennels < ActiveRecord::Migration
+            def self.up
+              create_table :guests_kennels do |t|
+                t.references :guest, :polymorphic => true
+                t.references :kennel
+              end
+            end
+
+            def self.down
+              drop_table :guests_kennels
+            end
+        end
 
 See ActiveRecord::Associations::PolymorphicClassMethods for more configuration options.
 
 ## Helper methods example
 
-  >> k = Kennel.find(1)
-  #<Kennel id: 1, name: "Happy Paws">
-  >> k.guests.map(&:class) 
-  [Dog, Cat, Cat, Bird]
-  
-  >> k.guests.push(Cat.create); k.cats.size
-  3
-  >> k.guests << Cat.create; k.cats.size
-  4
-  >> k.guests.size
-  6
+          >> k = Kennel.find(1)
+          #<Kennel id: 1, name: "Happy Paws">
+          >> k.guests.map(&:class)
+          [Dog, Cat, Cat, Bird]
 
-  >> d = k.dogs.first
-  #<Dog id: 3, name: "Rover">
-  >> d.kennels 
-  [#<Kennel id: 1, name: "Happy Paws">]
-  
-  >> k.guests.delete(d); k.dogs.size
-  0
-  >> k.guests.size
-  5  
+          >> k.guests.push(Cat.create); k.cats.size
+          3
+          >> k.guests << Cat.create; k.cats.size
+          4
+          >> k.guests.size
+          6
+
+          >> d = k.dogs.first
+          #<Dog id: 3, name: "Rover">
+          >> d.kennels
+          [#<Kennel id: 1, name: "Happy Paws">]
+
+          >> k.guests.delete(d); k.dogs.size
+          0
+          >> k.guests.size
+          5
   
 Note that the parent method is always plural, even if there is only one parent (<tt>Dog#kennels</tt>, not <tt>Dog#kennel</tt>).
 
@@ -144,15 +144,15 @@ See ActiveRecord::Associations::PolymorphicAssociation for more helper method de
 
 Double-sided relationships are defined on the join model:
 
-  class Devouring < ActiveRecord::Base
-    belongs_to :guest, :polymorphic => true
-    belongs_to :eaten, :polymorphic => true
-  
-    acts_as_double_polymorphic_join(
-      :guests =>[:dogs, :cats], 
-      :eatens => [:cats, :birds]
-    )       
-  end
+          class Devouring < ActiveRecord::Base
+            belongs_to :guest, :polymorphic => true
+            belongs_to :eaten, :polymorphic => true
+
+            acts_as_double_polymorphic_join(
+              :guests =>[:dogs, :cats],
+              :eatens => [:cats, :birds]
+            )
+          end
   
 Now, dogs and cats can eat birds and cats. Birds can't eat anything (they aren't <tt>guests</tt>) and dogs can't be eaten by anything (since they aren't <tt>eatens</tt>). The keys stand for what the models are, not what they do. 
 
@@ -160,25 +160,25 @@ In this case, each guest/eaten relationship is called a Devouring.
 
 In your migration, you need to declare both sides as polymorphic:
 
-  class CreateDevourings < ActiveRecord::Migration
-    def self.up
-      create_table :devourings do |t|
-        t.references :guest, :polymorphic => true
-        t.references :eaten, :polymorphic => true
-      end
-    end
-  
-    def self.down
-      drop_table :devourings
-    end
-  end
+          class CreateDevourings < ActiveRecord::Migration
+            def self.up
+              create_table :devourings do |t|
+                t.references :guest, :polymorphic => true
+                t.references :eaten, :polymorphic => true
+              end
+            end
+
+            def self.down
+              drop_table :devourings
+            end
+          end
 
 See ActiveRecord::Associations::PolymorphicClassMethods for more.
 
 ## Tagging generator
 
 Has_many_polymorphs includes a tagging system generator. Run:
-  script/generate tagging Dog Cat [...MoreModels...]
+          script/generate tagging Dog Cat [...MoreModels...]
 
 This adds a migration and new Tag and Tagging models in <tt>app/models</tt>. It configures Tag with an appropriate <tt>has_many_polymorphs</tt> call against the models you list at the command line. It also adds the file <tt>lib/tagging_extensions.rb</tt> and <tt>requires</tt> it in <tt>environment.rb</tt>. 
 
@@ -186,22 +186,22 @@ Tests will also be generated.
 
 Once you've run the generator, you can tag records as follows:
 
-  >> d = Dog.create(:name => "Rover")
-  #<Dog id: 3, name: "Rover">
-  >> d.tag_list
-  ""
-  >> d.tag_with "fierce loud"
-  #<Dog id: 3, name: "Rover">
-  >> d.tag_list
-  "fierce loud"
-  >> c = Cat.create(:name => "Chloe")
-  #<Cat id: 1, name: "Chloe">
-  >> c.tag_with "fierce cute"
-  #<Cat id: 1, name: "Chloe">
-  >> c.tag_list
-  "cute fierce"
-  >> Tag.find_by_name("fierce").taggables 
-  [#<Cat id: 1, name: "Chloe">, #<Dog id: 3, name: "Rover">]
+          >> d = Dog.create(:name => "Rover")
+          #<Dog id: 3, name: "Rover">
+          >> d.tag_list
+          ""
+          >> d.tag_with "fierce loud"
+          #<Dog id: 3, name: "Rover">
+          >> d.tag_list
+          "fierce loud"
+          >> c = Cat.create(:name => "Chloe")
+          #<Cat id: 1, name: "Chloe">
+          >> c.tag_with "fierce cute"
+          #<Cat id: 1, name: "Chloe">
+          >> c.tag_list
+          "cute fierce"
+          >> Tag.find_by_name("fierce").taggables
+          [#<Cat id: 1, name: "Chloe">, #<Dog id: 3, name: "Rover">]
 
 The generator accepts the optional flag <tt>--skip-migration</tt> to skip generating a migration (for example, if you are converting from <tt>acts_as_taggable</tt>). It also accepts the flag <tt>--self-referential</tt> if you want to be able to tag tags.
 
