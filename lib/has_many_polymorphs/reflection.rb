@@ -29,29 +29,15 @@ Inherits from ActiveRecord::Reflection::AssociationReflection.
         # nothing
       end
 
-      # Return the source reflection.
-      def source_reflection
-        # normally is the has_many to the through model, but we return ourselves,
-        # since there isn't a real source class for a polymorphic target
-        self
-      end
-
 
       def source_options
         options
       end
-      #
+
       def type
         @type = nil
       end
 
-
-      def chain
-        @chain ||= begin
-          chain = [self]
-          chain
-        end
-      end
 
       def association_class
         ActiveRecord::Associations::PolymorphicAssociation
