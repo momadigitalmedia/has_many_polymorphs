@@ -1,4 +1,5 @@
 require 'active_record'
+require 'active_record/associations/builder/has_many_polymorphs'
 require 'has_many_polymorphs/reflection'
 require 'has_many_polymorphs/association'
 require 'has_many_polymorphs/class_methods'

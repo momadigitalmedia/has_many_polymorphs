@@ -1,1 +1,4 @@
 test/integration/app/log
+
+.idea
+Gemfile.lock
