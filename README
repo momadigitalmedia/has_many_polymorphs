@@ -1,3 +1,15 @@
+Has_many_polymorphs For Rails 3.2
+
+This is my attempt to port the plugin to Rails 3.2. It is based on the earlier work done to support Rails 3 by James Stewart.
+
+This modification is not yet completely tested. As of this update, I have tested it only to cover my needs. I would continue to improve it.
+
+My Blog: {Anay Kamat's Weblog}[http://www.anaykamat.com]
+My Company: {PresentSoft Technologies Pvt. Ltd.}[http://www.presentsoft.co.in]
+
+Anay Kamat - 7th April 2013
+
+
 Has_many_polymorphs
 
 This is a hacky attempt to port has_many_polymorphs to work under Rails 3. It is intended solely
