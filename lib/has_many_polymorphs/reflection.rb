@@ -56,7 +56,7 @@ Inherits from ActiveRecord::Reflection::AssociationReflection.
         @additional_conditions = options[:from].map(&:to_s).sort.map(&:to_sym).map do |plural|
           model_class = plural._as_class
           table = model_class.table_name
-          "#{aliases["#{table}.#{model_class.primary_key}"]} > 0"
+          "#{table}.#{model_class.primary_key} > 0"
         end.join(" OR ")
       end
 
