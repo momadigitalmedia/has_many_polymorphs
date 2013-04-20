@@ -38,6 +38,20 @@ module ActiveRecord #:nodoc:
         self
       end
 
+      def delete(*records)
+        records = records.flatten
+        records.reject! {|record| @target.delete(record) if record.new_record?}
+        return if records.empty?
+
+        reflection.klass.transaction do
+          records.each do |record|
+            owner.send(reflection.options[:through]).where(construct_join_attributes(record)).delete_all
+            @target.delete(record)
+          end
+        end
+      end
+
+
       private
 
       def construct_join_attributes(record)
