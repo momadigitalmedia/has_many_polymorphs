@@ -5,7 +5,7 @@ module ActiveRecord
     class << self
 
       # Interprets a polymorphic row from a unified SELECT, returning the appropriate ActiveRecord instance. Overrides ActiveRecord::Base.instantiate_without_callbacks.
-      def instantiate_with_polymorphic_checks(record)
+      def instantiate_with_polymorphic_checks(record, foo=nil)
         if record['polymorphic_parent_class']
           reflection = record['polymorphic_parent_class'].constantize.reflect_on_association(record['polymorphic_association_id'].to_sym)
 #          _logger_debug "Instantiating a polymorphic row for #{record['polymorphic_parent_class']}.reflect_on_association(:#{record['polymorphic_association_id']})"

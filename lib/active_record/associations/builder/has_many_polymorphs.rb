@@ -2,9 +2,11 @@ require 'active_support/core_ext/object/inclusion'
 
 module ActiveRecord::Associations::Builder
   class HasManyPolymorphs < CollectionAssociation #:nodoc:
-    self.macro = :has_many_polymorphs
+    def macro
+      :has_many_polymorphs
+    end
 
-    self.valid_options += [:from, :through, :as, :conflicts, :polymorphic_key, :association_foreign_key, :polymorphic_type_key, :skip_duplicates, :dependent, :join_class_name, :table_aliases, :join_extend, :parent_extend, :rename_individual_collections]
+    self.valid_options = [:from, :through, :as, :conflicts, :polymorphic_key, :association_foreign_key, :polymorphic_type_key, :skip_duplicates, :dependent, :join_class_name, :table_aliases, :join_extend, :parent_extend, :rename_individual_collections]
 
     def build
       validate_options
