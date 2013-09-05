@@ -74,7 +74,7 @@ These options are passed through to targets on both sides of the association. If
           parent_hash_key = (collections.keys - [association_id]).first # parents are the entries in the _other_ children array
 
           begin
-            parent_foreign_key = self.reflect_on_association(parent_hash_key._singularize).primary_key_name
+            parent_foreign_key = self.reflect_on_association(parent_hash_key._singularize).active_record_primary_key
           rescue NoMethodError
             raise PolymorphicError, "Couldn't find 'belongs_to' association for :#{parent_hash_key._singularize} in #{self.name}." unless parent_foreign_key
           end
